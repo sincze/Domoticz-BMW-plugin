@@ -122,69 +122,69 @@ class BasePlugin:
 
     # --- Processing MQTT updates ---
     def update_devices(self, datapoint, value):
-    """
-    Match an incoming datapoint to a Domoticz device and update it.
-    Supports both single datapoint mappings and lists (e.g., Doors, Windows, Location).
-    """
-    mapping = BMW_MAPPING_TEMPLATE
-    matched_name = None
-
-    # Find which friendly name this datapoint corresponds to
-    for name, path in mapping.items():
-        if isinstance(path, list):
-            if datapoint in path:
-                matched_name = name
-                break
-        else:
-            if datapoint == path:
-                matched_name = name
-                break
-
-    if not matched_name:
-        Domoticz.Error(f"Received datapoint {datapoint} but no matching device mapping found.")
-        return
-
-    # Check that the Domoticz device exists
-    for unit, device in Devices.items():
-        if device.Name == matched_name:
-            # Determine nValue and sValue depending on type
-            nValue, sValue = 0, str(value)
-
-            # Switches: Doors, Windows, Locked, Charging, Driving
-            if matched_name in ["Doors", "Windows", "Locked", "Charging", "Driving"]:
-                if isinstance(value, str):
-                    val = value.lower() in ["true", "open", "on", "charging", "locked"]
-                else:
-                    val = bool(value)
-                nValue = 1 if val else 0
-                sValue = "On" if val else "Off"
-
-            # BatteryLevel: percentage
-            elif matched_name == "BatteryLevel":
-                try:
-                    sValue = str(int(value))
-                    nValue = int(value)
-                except Exception:
-                    sValue = str(value)
-
-            # Numeric custom devices: Mileage, RemainingRangeTotal, RemainingRangeElec, ChargingTime
-            elif matched_name in ["Mileage", "RemainingRangeTotal", "RemainingRangeElec", "ChargingTime"]:
-                try:
-                    sValue = f"{float(value):.0f}"
-                except Exception:
-                    sValue = str(value)
-
-            # Text devices: Location, others
+        """
+        Match an incoming datapoint to a Domoticz device and update it.
+        Supports both single datapoint mappings and lists (e.g., Doors, Windows, Location).
+        """
+        mapping = BMW_MAPPING_TEMPLATE
+        matched_name = None
+    
+        # Find which friendly name this datapoint corresponds to
+        for name, path in mapping.items():
+            if isinstance(path, list):
+                if datapoint in path:
+                    matched_name = name
+                    break
             else:
-                sValue = str(value)
-
-            # Update Domoticz device
-            device.Update(nValue=nValue, sValue=sValue)
-            Domoticz.Log(f"Updated {matched_name} = {sValue}")
+                if datapoint == path:
+                    matched_name = name
+                    break
+    
+        if not matched_name:
+            Domoticz.Error(f"Received datapoint {datapoint} but no matching device mapping found.")
             return
-
-    # If we get here, device mapping exists but Domoticz device is missing
-    Domoticz.Error(f"Received datapoint for {matched_name} but no matching device found.")
+    
+        # Check that the Domoticz device exists
+        for unit, device in Devices.items():
+            if device.Name == matched_name:
+                # Determine nValue and sValue depending on type
+                nValue, sValue = 0, str(value)
+    
+                # Switches: Doors, Windows, Locked, Charging, Driving
+                if matched_name in ["Doors", "Windows", "Locked", "Charging", "Driving"]:
+                    if isinstance(value, str):
+                        val = value.lower() in ["true", "open", "on", "charging", "locked"]
+                    else:
+                        val = bool(value)
+                    nValue = 1 if val else 0
+                    sValue = "On" if val else "Off"
+    
+                # BatteryLevel: percentage
+                elif matched_name == "BatteryLevel":
+                    try:
+                        sValue = str(int(value))
+                        nValue = int(value)
+                    except Exception:
+                        sValue = str(value)
+    
+                # Numeric custom devices: Mileage, RemainingRangeTotal, RemainingRangeElec, ChargingTime
+                elif matched_name in ["Mileage", "RemainingRangeTotal", "RemainingRangeElec", "ChargingTime"]:
+                    try:
+                        sValue = f"{float(value):.0f}"
+                    except Exception:
+                        sValue = str(value)
+    
+                # Text devices: Location, others
+                else:
+                    sValue = str(value)
+    
+                # Update Domoticz device
+                device.Update(nValue=nValue, sValue=sValue)
+                Domoticz.Log(f"Updated {matched_name} = {sValue}")
+                return
+    
+        # If we get here, device mapping exists but Domoticz device is missing
+        Domoticz.Error(f"Received datapoint for {matched_name} but no matching device found.")
     
 
     def update_device(self, name, value):
