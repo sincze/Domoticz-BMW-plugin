@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+BMW Python Plugin for Domoticz
+
+This plugin integrates BMW vehicles with Domoticz home automation system.
+It uses a separate docker that publishes data to MQTT. (https://github.com/dj0abr/bmw-mqtt-bridge)
+
+Original Author: Filip Demaertelaere
+Modified by:     sincze
+License: MIT
+"""
 """
 <plugin key="BMWviaMQTT" name="BMW via MQTT" author="sincze" version="2.0.3" externallink="https://github.com/FilipDem/Domoticz-BMW-plugin">
     <params>
